@@ -7,38 +7,18 @@ import pygame
 pygame.init()
 pygame.event.set_grab(True)
 pygame.mouse.set_visible(False)
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((1280, 720), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 running = True
 dt = 0
 
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
-cube_vertices = [
-        [-3, -3, -3, 1],
-        [3, -3, -3, 1],
-        [3, -3, 3, 1],
-        [-3, -3, 3, 1],
-        [-3, 3, -3, 1],
-        [3, 3, -3, 1],
-        [3, 3, 3, 1],
-        [-3, 3, 3, 1]
-        ]
-
-cube_indexes = [
-    [0, 1],
-    [1, 2],
-    [2, 3],
-    [3, 0],
-    [0, 4],
-    [1, 5],
-    [2, 6],
-    [3, 7],
-    [4, 5],
-    [5, 6],
-    [6, 7],
-    [7, 4],
-]
+dots = []
+for x in range(-10, 10):
+    for y in range(-10, 10):
+        for z in range(-10, 10):
+            dots.append([x,y,z,1])
 
 scale = 1
 pitch, yaw = 0, 0
@@ -70,11 +50,19 @@ while running:
 
     screen.fill("black")
 
+    translation_matrix = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, -15],
+        [0, 0, 0, 1]
+    ]
+
     sens = 10
     if pygame.mouse.get_focused():
         x_rel, y_rel = pygame.mouse.get_rel()
         pitch += radians(y_rel * dt * sens)
         yaw += radians(x_rel * dt * sens)
+        pygame.mouse.set_pos(screen.get_width()/2, screen.get_height()/2)
 
     yaw_matrix = [
         [cos(yaw), 0, sin(yaw), 0],
@@ -106,25 +94,18 @@ while running:
         [0, 0, 0, 1]
     ]
 
-    view_matrix = multiply_4d_matrices(scale_matrix, rotation_matrix)
+    model_matrix = multiply_4d_matrices(rotation_matrix, scale_matrix)
 
-    cube_translation_matrix = [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -15],
-        [0, 0, 0, 1]
-    ]
-
-    view_matrix = multiply_4d_matrices(cube_translation_matrix, view_matrix)
+    view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
 
     screen_points = []
-    for v in cube_vertices:
-        transformed_cube_vertex = multiply_matrix_vector(v, view_matrix)
-        x_projected, y_projected = world_to_screen(transformed_cube_vertex)
+    for d in dots:
+        transformed_dot = multiply_matrix_vector(d, view_matrix)
+        x_projected, y_projected = world_to_screen(transformed_dot)
         screen_points.append((screen.get_width()/2+x_projected*700, screen.get_height()/2-y_projected*700))
 
-    for i in cube_indexes:
-        pygame.draw.line(screen, "purple", screen_points[i[0]], screen_points[i[1]])
+    for sp in screen_points:
+        pygame.draw.circle(screen, "purple", (sp[0], sp[1]), 2)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
