@@ -109,19 +109,30 @@ while running:
         [0, 0, 0, 1],
     ]
 
-    #view_matrix = multiply_4d_matrices(sharp_matrix, view_matrix)
+    view_matrix = multiply_4d_matrices(sharp_matrix, view_matrix)
 
+    screen_points = []
     for d in dots:
         transformed_dot = multiply_matrix_vector(d, view_matrix)
-        if transformed_dot[2] >= 0:
+
+        if transformed_dot[2] >= -0.1:
             continue
 
+        screen_points.append({
+            'dot': transformed_dot,
+            'y': d[1]
+        })
+
+    screen_points.sort(key=lambda i: i['dot'][2])
+
+    for sp in screen_points:
+        transformed_dot = sp['dot']
         x_projected, y_projected = world_to_screen(transformed_dot)
+
         screen_x = screen.get_width() / 2 + x_projected * 700
         screen_y = screen.get_height() / 2 - y_projected * 700
 
-        distance = sqrt(d[0] ** 2 + d[1] ** 2 + d[2] ** 2)
-        hue = int(((d[1] + 10) / 20) * 360) % 360
+        hue = int(((sp['y'] + 10) / 20) * 360) % 360
         color = pygame.Color(0)
         color.hsva = (hue, 100, 100, 100)
 
