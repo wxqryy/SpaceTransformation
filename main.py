@@ -29,6 +29,12 @@ translation_matrix = [
 ]
 basis_keys = {pygame.K_i: 'i', pygame.K_j: 'j', pygame.K_k: 'k'}
 axis_keys = {pygame.K_x: 'x', pygame.K_y: 'y', pygame.K_z: 'z'}
+color_cache = {}
+for y in range(-10, 10):
+    hue = int(((y + 10) / 20) * 360) % 360
+    color = pygame.Color(0)
+    color.hsva = (hue, 100, 100, 100)
+    color_cache[y] = color
 
 def multiply_4d_matrices(A, B):
     C = []
@@ -170,11 +176,7 @@ while running:
         screen_x = screen.get_width() / 2 + x_projected * 700
         screen_y = screen.get_height() / 2 - y_projected * 700
 
-        hue = int(((sp['y'] + 10) / 20) * 360) % 360
-        color = pygame.Color(0)
-        color.hsva = (hue, 100, 100, 100)
-
-        pygame.draw.circle(screen, color, (screen_x, screen_y), 2)
+        pygame.draw.circle(screen, color_cache[sp['y']], (screen_x, screen_y), 2)
 
     pygame.display.flip()
     dt = clock.tick(60) / 1000
