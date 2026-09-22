@@ -43,6 +43,9 @@ def multiply_matrix_vector(A, B):
 def world_to_screen(V):
     return V[0]/-V[2], V[1]/-V[2]
 
+def get_matrix_determinant(A):
+    return A[0][0]*A[1][1]*A[2][2]+A[0][1]*A[1][2]*A[2][0]+A[0][2]*A[1][0]*A[2][1]-(A[0][2]*A[1][1]*A[2][0]+A[0][1]*A[1][0]*A[2][2]+A[0][0]*A[1][2]*A[2][1])
+
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -51,6 +54,8 @@ while running:
             running = False
 
     screen.fill("black")
+    keys = pygame.key.get_pressed()
+    font = pygame.font.SysFont("Arial", 20)
 
     translation_matrix = [
         [1, 0, 0, 0],
@@ -80,9 +85,6 @@ while running:
         [0, 0, 0, 1]
     ]
 
-    rotation_matrix = multiply_4d_matrices(pitch_matrix, yaw_matrix)
-
-    keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
         scale += 1 * dt
     elif keys[pygame.K_s]:
@@ -129,25 +131,30 @@ while running:
             m[f'{basis}{axis}'] += 0.5 * dt
         elif keys[pygame.K_q]:
             m[f'{basis}{axis}'] -= 0.5 * dt
-    font = pygame.font.SysFont("Arial", 20)
+
+
+    custom_matrix = multiply_4d_matrices(user_input_matrix, scale_matrix)
+    rotation_matrix = multiply_4d_matrices(pitch_matrix, yaw_matrix)
+    model_matrix = multiply_4d_matrices(rotation_matrix, custom_matrix)
+    view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
+
+
+    scale_surface = font.render('scale: w / s', True, "white")
+    screen.blit(scale_surface, (10, screen.get_height() - (70 + 20 + 20+20)))
+
     edit_surface = font.render(f"edit: {basis}-{axis}", True, "white")
-    screen.blit(edit_surface, (10, screen.get_height()-(20+70)))
+    screen.blit(edit_surface, (10, screen.get_height() - (20 + 70+20)))
 
     matrix_row_x = font.render(f"{m['ix']:.1f}|{m['jx']:.1f}|{m['kx']:.1f}", True, "white")
     matrix_row_y = font.render(f"{m['iy']:.1f}|{m['jy']:.1f}|{m['ky']:.1f}", True, "white")
     matrix_row_z = font.render(f"{m['iz']:.1f}|{m['jz']:.1f}|{m['kz']:.1f}", True, "white")
-    screen.blit(matrix_row_x, (10, screen.get_height()-(10+20+20+20)))
-    screen.blit(matrix_row_y, (10, screen.get_height()-(10+20+20)))
-    screen.blit(matrix_row_z, (10, screen.get_height()-(10+20)))
+    screen.blit(matrix_row_x, (10, screen.get_height() - (10 + 20 + 20 + 20+20)))
+    screen.blit(matrix_row_y, (10, screen.get_height() - (10 + 20 + 20+20)))
+    screen.blit(matrix_row_z, (10, screen.get_height() - (10 + 20+20)))
 
-    scale_surface = font.render('scale: w / s', True, "white")
-    screen.blit(scale_surface, (10, screen.get_height()-(70+20+20)))
+    matrix_determinant = font.render(f"{get_matrix_determinant([[m['ix'], m['jx'], m['kx']],[m['iy'], m['jy'], m['ky']],[m['iz'], m['jz'], m['kz']]]):.6f}", True, "white")
+    screen.blit(matrix_determinant, (10, screen.get_height() - (10 + 20)))
 
-    custom_matrix = multiply_4d_matrices(user_input_matrix, scale_matrix)
-
-    model_matrix = multiply_4d_matrices(rotation_matrix, custom_matrix)
-
-    view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
 
     screen_points = []
     for d in dots:
