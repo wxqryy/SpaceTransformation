@@ -29,6 +29,7 @@ translation_matrix = [
 ]
 basis_keys = {pygame.K_i: 'i', pygame.K_j: 'j', pygame.K_k: 'k'}
 axis_keys = {pygame.K_x: 'x', pygame.K_y: 'y', pygame.K_z: 'z'}
+font = pygame.font.SysFont(["Arial", None], 20)
 color_cache = {}
 for y in range(-10, 10):
     hue = int(((y + 10) / 20) * 360) % 360
@@ -68,7 +69,6 @@ while running:
 
     screen.fill("black")
     keys = pygame.key.get_pressed()
-    font = pygame.font.SysFont("Arial", 20)
 
 
     if keys[pygame.K_r]:
