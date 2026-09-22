@@ -85,7 +85,11 @@ while running:
         scale += 1 * dt
     elif keys[pygame.K_s]:
         scale -= 1 * dt
+    if keys[pygame.K_r]:
+        pitch = 0
+        yaw = 0
     if scale <= 0.1: scale = 0.1
+    if scale >= 1.1: scale = 1.1
 
     scale_matrix = [
         [scale, 0, 0, 0],
