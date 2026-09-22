@@ -1,9 +1,7 @@
-# Example file showing a circle moving on screen
 from math import *
 
 import pygame
 
-# pygame setup
 pygame.init()
 pygame.event.set_grab(True)
 pygame.mouse.set_visible(False)
@@ -22,6 +20,10 @@ for x in range(-10, 10):
 
 scale = 1
 pitch, yaw = 0, 0
+basis = "i / j / k"
+axis = "x / y / z"
+m = {'ix':1, 'iy':0, 'iz':0, 'jx':0, 'jy':1, 'jz':0, 'kx':0, 'ky':0, 'kz':1}
+M = {'ix':1, 'iy':0, 'iz':0, 'jx':0, 'jy':1, 'jz':0, 'kx':0, 'ky':0, 'kz':1}
 
 def multiply_4d_matrices(A, B):
     C = []
@@ -88,6 +90,10 @@ while running:
     if keys[pygame.K_r]:
         pitch = 0
         yaw = 0
+        m = M.copy()
+    if keys[pygame.K_c]:
+        if len(axis) == 1 and len(basis) == 1:
+            m[f'{basis}{axis}'] = M[f'{basis}{axis}']
     if scale <= 0.1: scale = 0.1
     if scale >= 3: scale = 3
 
@@ -98,18 +104,50 @@ while running:
         [0, 0, 0, 1]
     ]
 
-    model_matrix = multiply_4d_matrices(rotation_matrix, scale_matrix)
-
-    view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
-
-    sharp_matrix = [
-        [1, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
+    user_input_matrix = [
+        [m['ix'], m['jx'], m['kx'], 0],
+        [m['iy'], m['jy'], m['ky'], 0],
+        [m['iz'], m['jz'], m['kz'], 0],
         [0, 0, 0, 1],
     ]
+    if keys[pygame.K_i]:
+        basis = 'i'
+    elif keys[pygame.K_j]:
+        basis = 'j'
+    elif keys[pygame.K_k]:
+        basis = 'k'
 
-    view_matrix = multiply_4d_matrices(sharp_matrix, view_matrix)
+    if keys[pygame.K_x]:
+        axis = 'x'
+    elif keys[pygame.K_y]:
+        axis = 'y'
+    elif keys[pygame.K_z]:
+        axis = 'z'
+
+    if len(axis) == 1 and len(basis) == 1:
+        if keys[pygame.K_e]:
+            m[f'{basis}{axis}'] += 0.5 * dt
+        elif keys[pygame.K_q]:
+            m[f'{basis}{axis}'] -= 0.5 * dt
+    font = pygame.font.SysFont("Arial", 20)
+    edit_surface = font.render(f"edit: {basis}-{axis}", True, "white")
+    screen.blit(edit_surface, (10, screen.get_height()-(20+70)))
+
+    matrix_row_x = font.render(f"{m['ix']:.1f}|{m['jx']:.1f}|{m['kx']:.1f}", True, "white")
+    matrix_row_y = font.render(f"{m['iy']:.1f}|{m['jy']:.1f}|{m['ky']:.1f}", True, "white")
+    matrix_row_z = font.render(f"{m['iz']:.1f}|{m['jz']:.1f}|{m['kz']:.1f}", True, "white")
+    screen.blit(matrix_row_x, (10, screen.get_height()-(10+20+20+20)))
+    screen.blit(matrix_row_y, (10, screen.get_height()-(10+20+20)))
+    screen.blit(matrix_row_z, (10, screen.get_height()-(10+20)))
+
+    scale_surface = font.render('scale: w / s', True, "white")
+    screen.blit(scale_surface, (10, screen.get_height()-(70+20+20)))
+
+    custom_matrix = multiply_4d_matrices(user_input_matrix, scale_matrix)
+
+    model_matrix = multiply_4d_matrices(rotation_matrix, custom_matrix)
+
+    view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
 
     screen_points = []
     for d in dots:
