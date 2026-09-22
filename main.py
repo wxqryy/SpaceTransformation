@@ -155,7 +155,7 @@ while running:
     screen.blit(matrix_row_y, (10, screen.get_height() - (10 + 20 + 20+20)))
     screen.blit(matrix_row_z, (10, screen.get_height() - (10 + 20+20)))
 
-    matrix_determinant = font.render(f"{get_matrix_determinant([[m['ix'], m['jx'], m['kx']],[m['iy'], m['jy'], m['ky']],[m['iz'], m['jz'], m['kz']]]):.6f}", True, "white")
+    matrix_determinant = font.render(f"det: {get_matrix_determinant([[m['ix'], m['jx'], m['kx']],[m['iy'], m['jy'], m['ky']],[m['iz'], m['jz'], m['kz']]]):.4f}", True, "white")
     screen.blit(matrix_determinant, (10, screen.get_height() - (10 + 20)))
 
 
