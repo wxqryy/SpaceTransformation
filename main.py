@@ -89,7 +89,7 @@ while running:
         pitch = 0
         yaw = 0
     if scale <= 0.1: scale = 0.1
-    if scale >= 1.1: scale = 1.1
+    if scale >= 3: scale = 3
 
     scale_matrix = [
         [scale, 0, 0, 0],
@@ -113,6 +113,9 @@ while running:
 
     for d in dots:
         transformed_dot = multiply_matrix_vector(d, view_matrix)
+        if transformed_dot[2] >= 0:
+            continue
+
         x_projected, y_projected = world_to_screen(transformed_dot)
         screen_x = screen.get_width() / 2 + x_projected * 700
         screen_y = screen.get_height() / 2 - y_projected * 700
