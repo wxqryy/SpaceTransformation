@@ -121,7 +121,7 @@ while running:
     for v in cube_vertices:
         transformed_cube_vertex = multiply_matrix_vector(v, view_matrix)
         x_projected, y_projected = world_to_screen(transformed_cube_vertex)
-        screen_points.append((x_projected*700, y_projected*700))
+        screen_points.append((screen.get_width()/2+x_projected*700, screen.get_height()/2+y_projected*700))
 
     for i in cube_indexes:
         pygame.draw.line(screen, "purple", screen_points[i[0]], screen_points[i[1]])
