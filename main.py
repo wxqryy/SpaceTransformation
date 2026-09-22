@@ -59,7 +59,7 @@ def multiply_matrix_vector(A, B):
     return V
 
 def world_to_screen(V):
-    return -(V[0]/V[2]), -(V[1]/V[2])
+    return V[0]/-V[2], V[1]/-V[2]
 
 while running:
     # poll for events
@@ -109,8 +109,8 @@ while running:
     view_matrix = multiply_4d_matrices(scale_matrix, rotation_matrix)
 
     cube_translation_matrix = [
-        [1, 0, 0, 5],
-        [0, 1, 0, 5],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
         [0, 0, 1, -15],
         [0, 0, 0, 1]
     ]
@@ -121,7 +121,7 @@ while running:
     for v in cube_vertices:
         transformed_cube_vertex = multiply_matrix_vector(v, view_matrix)
         x_projected, y_projected = world_to_screen(transformed_cube_vertex)
-        screen_points.append((screen.get_width()/2+x_projected*700, screen.get_height()/2+y_projected*700))
+        screen_points.append((screen.get_width()/2+x_projected*700, screen.get_height()/2-y_projected*700))
 
     for i in cube_indexes:
         pygame.draw.line(screen, "purple", screen_points[i[0]], screen_points[i[1]])
