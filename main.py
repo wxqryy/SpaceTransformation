@@ -102,14 +102,27 @@ while running:
 
     view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
 
-    screen_points = []
+    sharp_matrix = [
+        [1, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ]
+
+    #view_matrix = multiply_4d_matrices(sharp_matrix, view_matrix)
+
     for d in dots:
         transformed_dot = multiply_matrix_vector(d, view_matrix)
         x_projected, y_projected = world_to_screen(transformed_dot)
-        screen_points.append((screen.get_width()/2+x_projected*700, screen.get_height()/2-y_projected*700))
+        screen_x = screen.get_width() / 2 + x_projected * 700
+        screen_y = screen.get_height() / 2 - y_projected * 700
 
-    for sp in screen_points:
-        pygame.draw.circle(screen, "purple", (sp[0], sp[1]), 2)
+        distance = sqrt(d[0] ** 2 + d[1] ** 2 + d[2] ** 2)
+        hue = int(((d[1] + 10) / 20) * 360) % 360
+        color = pygame.Color(0)
+        color.hsva = (hue, 100, 100, 100)
+
+        pygame.draw.circle(screen, color, (screen_x, screen_y), 2)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
