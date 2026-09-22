@@ -4,7 +4,7 @@ import pygame
 pygame.init()
 pygame.event.set_grab(True)
 pygame.mouse.set_visible(False)
-screen = pygame.display.set_mode((1280, 720), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 dt = 0
