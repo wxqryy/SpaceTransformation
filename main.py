@@ -1,7 +1,5 @@
 from math import *
-
 import pygame
-from pygame.constants import K_ESCAPE
 
 pygame.init()
 pygame.event.set_grab(True)
@@ -10,8 +8,6 @@ screen = pygame.display.set_mode((1280, 720), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 running = True
 dt = 0
-
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
 dots = []
 for x in range(-10, 10):
@@ -25,6 +21,14 @@ basis = "i / j / k"
 axis = "x / y / z"
 m = {'ix':1, 'iy':0, 'iz':0, 'jx':0, 'jy':1, 'jz':0, 'kx':0, 'ky':0, 'kz':1}
 M = {'ix':1, 'iy':0, 'iz':0, 'jx':0, 'jy':1, 'jz':0, 'kx':0, 'ky':0, 'kz':1}
+translation_matrix = [
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, -15],
+    [0, 0, 0, 1]
+]
+basis_keys = {pygame.K_i: 'i', pygame.K_j: 'j', pygame.K_k: 'k'}
+axis_keys = {pygame.K_x: 'x', pygame.K_y: 'y', pygame.K_z: 'z'}
 
 def multiply_4d_matrices(A, B):
     C = []
@@ -48,8 +52,6 @@ def get_matrix_determinant(A):
     return A[0][0]*A[1][1]*A[2][2]+A[0][1]*A[1][2]*A[2][0]+A[0][2]*A[1][0]*A[2][1]-(A[0][2]*A[1][1]*A[2][0]+A[0][1]*A[1][0]*A[2][2]+A[0][0]*A[1][2]*A[2][1])
 
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -57,22 +59,26 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
+
     screen.fill("black")
     keys = pygame.key.get_pressed()
     font = pygame.font.SysFont("Arial", 20)
 
-    translation_matrix = [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -15],
-        [0, 0, 0, 1]
-    ]
 
-    sens = 10
+    if keys[pygame.K_r]:
+        pitch = 0
+        yaw = 0
+        m = M.copy()
+
+    if keys[pygame.K_c]:
+        if len(axis) == 1 and len(basis) == 1:
+            m[f'{basis}{axis}'] = M[f'{basis}{axis}']
+
+
     if pygame.mouse.get_focused():
         x_rel, y_rel = pygame.mouse.get_rel()
-        pitch += radians(y_rel * dt * sens)
-        yaw += radians(x_rel * dt * sens)
+        pitch += radians(y_rel * dt * 10)
+        yaw += radians(x_rel * dt * 10)
         pygame.mouse.set_pos(screen.get_width()/2, screen.get_height()/2)
 
     yaw_matrix = [
@@ -89,17 +95,11 @@ while running:
         [0, 0, 0, 1]
     ]
 
+
     if keys[pygame.K_w]:
         scale += 1 * dt
     elif keys[pygame.K_s]:
         scale -= 1 * dt
-    if keys[pygame.K_r]:
-        pitch = 0
-        yaw = 0
-        m = M.copy()
-    if keys[pygame.K_c]:
-        if len(axis) == 1 and len(basis) == 1:
-            m[f'{basis}{axis}'] = M[f'{basis}{axis}']
     if scale <= 0.1: scale = 0.1
     if scale >= 3: scale = 3
 
@@ -116,21 +116,14 @@ while running:
         [m['iz'], m['jz'], m['kz'], 0],
         [0, 0, 0, 1],
     ]
-    if keys[pygame.K_i]:
-        basis = 'i'
-    elif keys[pygame.K_j]:
-        basis = 'j'
-    elif keys[pygame.K_k]:
-        basis = 'k'
 
-    if keys[pygame.K_x]:
-        axis = 'x'
-    elif keys[pygame.K_y]:
-        axis = 'y'
-    elif keys[pygame.K_z]:
-        axis = 'z'
+    for key, char in basis_keys.items():
+        if keys[key]: basis = char
 
-    if len(axis) == 1 and len(basis) == 1:
+    for key, char in axis_keys.items():
+        if keys[key]: axis = char
+
+    if len(axis+basis) == 2:
         if keys[pygame.K_e]:
             m[f'{basis}{axis}'] += 0.5 * dt
         elif keys[pygame.K_q]:
@@ -164,13 +157,9 @@ while running:
     for d in dots:
         transformed_dot = multiply_matrix_vector(d, view_matrix)
 
-        if transformed_dot[2] >= -0.1:
-            continue
+        if transformed_dot[2] >= -0.1: continue
 
-        screen_points.append({
-            'dot': transformed_dot,
-            'y': d[1]
-        })
+        screen_points.append({'dot': transformed_dot,'y': d[1]})
 
     screen_points.sort(key=lambda i: i['dot'][2])
 
@@ -187,12 +176,7 @@ while running:
 
         pygame.draw.circle(screen, color, (screen_x, screen_y), 2)
 
-    # flip() the display to put your work on screen
     pygame.display.flip()
-
-    # limits FPS to 60
-    # dt is delta time in seconds since last frame, used for framerate-
-    # independent physics.
     dt = clock.tick(60) / 1000
 
 pygame.quit()
