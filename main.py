@@ -142,10 +142,10 @@ while running:
     view_matrix = multiply_4d_matrices(translation_matrix, model_matrix)
 
 
-    scale_surface = font.render('scale: w / s', True, "white")
+    scale_surface = font.render(f'scale: {scale:.1f} | w / s', True, "white")
     screen.blit(scale_surface, (10, screen.get_height() - (70 + 20 + 20+20)))
 
-    edit_surface = font.render(f"edit: {basis}-{axis}", True, "white")
+    edit_surface = font.render(f"edit: {basis}-{axis}{' | e / q' if len(basis+axis)==2 else ''}", True, "white")
     screen.blit(edit_surface, (10, screen.get_height() - (20 + 70+20)))
 
     matrix_row_x = font.render(f"{m['ix']:.1f}|{m['jx']:.1f}|{m['kx']:.1f}", True, "white")
